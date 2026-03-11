@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>AI Tools Hub</title>
+
+<style>
+
+body{
+background:#0f0f0f;
+color:white;
+font-family:Arial;
+text-align:center;
+}
+
+.box{
+border:1px solid #333;
+padding:20px;
+margin:20px;
+border-radius:10px;
+}
+
+input,textarea{
+width:80%;
+padding:10px;
+margin:10px;
+}
+
+button{
+padding:10px 20px;
+background:#00ffaa;
+border:none;
+cursor:pointer;
+}
+
+img{
+max-width:300px;
+margin-top:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>AI Tools Hub</h1>
+
+
+<div class="box">
+
+<h2>AI Chat</h2>
+
+<textarea id="chatInput" placeholder="Ask AI anything"></textarea>
+
+<button onclick="aiChat()">Generate</button>
+
+<p id="chatResult"></p>
+
+</div>
+
+
+
+<div class="box">
+
+<h2>AI Image Generator</h2>
+
+<input id="imagePrompt" placeholder="Enter image prompt">
+
+<button onclick="generateImage()">Create Image</button>
+
+<img id="imageResult">
+
+</div>
+
+
+
+<div class="box">
+
+<h2>Latest News</h2>
+
+<button onclick="getNews()">Load News</button>
+
+<div id="news"></div>
+
+</div>
+
+
+<script>
+
+
+const OPENAI_API="PASTE_OPENAI_API_KEY"
+
+const IMAGE_API="PASTE_STABILITY_API_KEY"
+
+const NEWS_API="PASTE_NEWS_API_KEY"
+
+
+
+async function aiChat(){
+
+let prompt=document.getElementById("chatInput").value
+
+let res=await fetch("https://api.openai.com/v1/chat/completions",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+OPENAI_API
+},
+
+body:JSON.stringify({
+
+model:"gpt-4o-mini",
+
+messages:[{role:"user",content:prompt}]
+
+})
+
+})
+
+let data=await res.json()
+
+document.getElementById("chatResult").innerText=data.choices[0].message.content
+
+}
+
+
+
+async function generateImage(){
+
+let prompt=document.getElementById("imagePrompt").value
+
+let res=await fetch("https://api.stability.ai/v1/generation/stable-diffusion/text-to-image",{
+
+method:"POST",
+
+headers:{
+"Authorization":"Bearer "+IMAGE_API,
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+text_prompts:[{text:prompt}]
+
+})
+
+})
+
+let data=await res.json()
+
+let image=data.artifacts[0].base64
+
+document.getElementById("imageResult").src="data:image/png;base64,"+image
+
+}
+
+
+
+async function getNews(){
+
+let res=await fetch("https://newsapi.org/v2/top-headlines?country=us&apiKey="+NEWS_API)
+
+let data=await res.json()
+
+let html=""
+
+data.articles.forEach(a=>{
+
+html+="<p>"+a.title+"</p>"
+
+})
+
+document.getElementById("news").innerHTML=html
+
+}
+
+
+</script>
+
+</body>
+</html>
